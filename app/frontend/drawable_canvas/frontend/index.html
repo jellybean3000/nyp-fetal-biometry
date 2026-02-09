@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<style>
+  /* ── Reset ── */
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: transparent; font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", sans-serif; -webkit-font-smoothing: antialiased; }
+
+  /* ── Wrapper ── */
+  #wrapper {
+    display: inline-block;
+    max-width: 100%;
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+    border: 1px solid rgba(0,0,0,0.06);
+    transition: box-shadow 0.25s cubic-bezier(0.25,0.1,0.25,1);
+  }
+  #wrapper:hover {
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+  }
+
+  /* ── Header Bar ── */
+  .header-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 12px;                     /* 2× / 3× */
+    background: #F5F5F7;
+    border-bottom: 1px solid rgba(0,0,0,0.06);
+  }
+  .header-label {
+    font-size: 11px;                        /* caption2 */
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: #86868B;
+    line-height: 1.3;
+  }
+  .header-badge {
+    font-size: 12px;                        /* caption */
+    font-weight: 500;
+    color: #6E6E73;
+    background: #E8E8ED;
+    padding: 4px 8px;                       /* 1× / 2× */
+    border-radius: 4px;
+    font-family: "SF Mono", SFMono-Regular, ui-monospace, Menlo, monospace;
+    letter-spacing: 0.02em;
+    line-height: 1.2;
+  }
+
+  /* ── Image + Canvas Container ── */
+  #container {
+    position: relative;
+    line-height: 0;
+    background: #F5F5F7;
+  }
+  #bg-image {
+    display: block;
+    width: 100%;
+    height: auto;
+    user-select: none;
+    -webkit-user-drag: none;
+  }
+  #draw-canvas {
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    cursor: crosshair;
+  }
+
+  /* ── Toolbar ── */
+  .toolbar {
+    display: flex;
+    gap: 8px;                               /* 2× */
+    padding: 8px 12px;                      /* 2× / 3× */
+    align-items: center;
+    background: #F5F5F7;
+    border-top: 1px solid rgba(0,0,0,0.06);
+  }
+  .toolbar button {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;                               /* 1× */
+    padding: 6px 12px;                      /* 1.5× / 3× — better click target */
+    border: 1px solid rgba(0,0,0,0.06);
+    border-radius: 8px;                     /* radius-sm */
+    background: #FFFFFF;
+    cursor: pointer;
+    font-size: 12px;                        /* caption */
+    font-weight: 500;
+    color: #6E6E73;
+    font-family: inherit;
+    line-height: 1.3;
+    transition: all 0.15s cubic-bezier(0.25,0.1,0.25,1);
+    box-shadow: 0 1px 2px rgba(0,0,0,0.04);
+  }
+  .toolbar button:hover {
+    background: #E8E8ED;
+    color: #1D1D1F;
+    border-color: rgba(0,0,0,0.10);
+    box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+  }
+  .toolbar button:active {
+    transform: scale(0.97);
+    background: #DCDCE0;
+    transition-duration: 0.08s;
+  }
+  .toolbar button:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 4px rgba(0,122,255,0.24);
+  }
+
+  /* Clear button — subtle danger affordance */
+  .toolbar button#clear-btn:hover {
+    color: #D70015;
+    border-color: rgba(255,59,48,0.15);
+    background: rgba(255,59,48,0.06);
+  }
+
+  .rect-count {
+    font-size: 12px;                        /* caption */
+    color: #86868B;
+    margin-left: auto;
+    font-weight: 500;
+    font-variant-numeric: tabular-nums;
+    line-height: 1.3;
+    transition: color 0.25s;
+  }
+  .rect-count.has-rects {
+    color: #6E6E73;
+  }
+
+  /* ── Drawing feedback ── */
+  #draw-canvas.is-drawing {
+    cursor: crosshair;
+  }
+
+  /* ── Keyboard shortcut hint ── */
+  .toolbar .shortcut {
+    font-size: 11px;                        /* caption2 — SF Pro minimum */
+    color: #AEAEB2;
+    font-family: "SF Mono", SFMono-Regular, ui-monospace, Menlo, monospace;
+    margin-left: 2px;
+  }
+
+  /* ── Reduced motion ── */
+  @media (prefers-reduced-motion: reduce) {
+    * { animation-duration: 0s !important; transition-duration: 0s !important; }
+  }
+</style>
+</head>
+<body>
+<div id="wrapper">
+  <div id="header-bar" class="header-bar" style="display:none;">
+    <span id="header-label" class="header-label"></span>
+    <span id="header-badge" class="header-badge"></span>
+  </div>
+  <div id="container">
+    <img id="bg-image" alt="" draggable="false">
+    <canvas id="draw-canvas" role="application" aria-roledescription="drawing canvas" aria-label="Ultrasound image annotation canvas — draw rectangles to mark landmarks"></canvas>
+  </div>
+  <div class="toolbar">
+    <button id="undo-btn" title="Undo last box" aria-label="Undo last box">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="1 4 1 10 7 10"></polyline>
+        <path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"></path>
+      </svg>
+      Undo<span id="undo-shortcut" class="shortcut"></span>
+    </button>
+    <button id="clear-btn" title="Clear all boxes" aria-label="Clear all boxes">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="18" y1="6" x2="6" y2="18"></line>
+        <line x1="6" y1="6" x2="18" y2="18"></line>
+      </svg>
+      Clear
+    </button>
+    <span id="rect-count" class="rect-count" aria-live="polite"></span>
+  </div>
+</div>
+
+<script>
+(function() {
+  /* ── Streamlit Component API ── */
+  function sendReady() {
+    window.parent.postMessage({
+      isStreamlitMessage: true, type: "streamlit:componentReady", apiVersion: 1
+    }, "*");
+  }
+  function setFrameHeight(h) {
+    window.parent.postMessage({
+      isStreamlitMessage: true, type: "streamlit:setFrameHeight", height: Math.ceil(h)
+    }, "*");
+  }
+  function setComponentValue(val) {
+    window.parent.postMessage({
+      isStreamlitMessage: true, type: "streamlit:setComponentValue", value: val
+    }, "*");
+  }
+
+  /* ── State ── */
+  var rectangles = [];
+  var isDrawing = false;
+  var startX = 0, startY = 0;
+  var currentRect = null;
+  var strokeColor = "#32ADE6";
+  var fillColor = "rgba(50,173,230,0.08)";
+  var strokeWidth = 2;
+  var naturalW = 900, naturalH = 600;
+  var strokeColors = null;
+  var fillColors = null;
+  var boxLabels = null;
+
+  /* ── DOM refs ── */
+  var wrapper = document.getElementById("wrapper");
+  var headerBar = document.getElementById("header-bar");
+  var headerLabel = document.getElementById("header-label");
+  var headerBadge = document.getElementById("header-badge");
+  var img = document.getElementById("bg-image");
+  var canvas = document.getElementById("draw-canvas");
+  var ctx = canvas.getContext("2d");
+  var countEl = document.getElementById("rect-count");
+
+  /* ── Scale factor: maps CSS pixels to logical drawing pixels ── */
+  function getScale() {
+    var displayW = img.clientWidth || naturalW;
+    return naturalW / displayW;
+  }
+
+  /* ── Render handler (from Streamlit) ── */
+  function onRender(event) {
+    if (!event.data || event.data.type !== "streamlit:render") return;
+    var args = event.data.args;
+    naturalW = args.width || 900;
+    naturalH = args.height || 600;
+    strokeColor = args.stroke_color || "#32ADE6";
+    fillColor = args.fill_color || "rgba(50,173,230,0.08)";
+    strokeWidth = args.stroke_width || 2;
+    strokeColors = args.stroke_colors || null;
+    fillColors = args.fill_colors || null;
+    boxLabels = args.box_labels || null;
+
+    /* Header bar */
+    if (args.header_label) {
+      headerBar.style.display = "flex";
+      headerLabel.textContent = args.header_label;
+      headerBadge.textContent = args.header_badge || "";
+    } else {
+      headerBar.style.display = "none";
+    }
+
+    /* Canvas internal resolution — retina-aware */
+    var dpr = window.devicePixelRatio || 1;
+    canvas.width = naturalW * dpr;
+    canvas.height = naturalH * dpr;
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+    /* Load image — reset drawings when image changes */
+    if (args.image_b64) {
+      var src = "data:image/png;base64," + args.image_b64;
+      if (img.getAttribute("data-hash") !== args.image_b64.slice(-32)) {
+        img.src = src;
+        img.setAttribute("data-hash", args.image_b64.slice(-32));
+        if (rectangles.length > 0) {
+          rectangles = [];
+          setComponentValue(rectangles);
+          updateCount();
+        }
+      }
+    }
+
+    redraw();
+    updateFrameHeight();
+  }
+
+  function updateFrameHeight() {
+    var h = wrapper.offsetHeight;
+    if (h > 0) setFrameHeight(h + 2);
+  }
+
+  window.addEventListener("message", onRender);
+
+  /* Recalc height after image loads */
+  img.addEventListener("load", function() {
+    updateFrameHeight();
+  });
+  img.addEventListener("error", function() {
+    console.error("drawable_canvas: failed to decode background image");
+  });
+
+  /* ── Coordinate helpers ── */
+  function getCanvasXY(e) {
+    var r = canvas.getBoundingClientRect();
+    var s = getScale();
+    return { x: (e.clientX - r.left) * s, y: (e.clientY - r.top) * s };
+  }
+  function getTouchXY(e) {
+    var t = e.touches[0], r = canvas.getBoundingClientRect();
+    var s = getScale();
+    return { x: (t.clientX - r.left) * s, y: (t.clientY - r.top) * s };
+  }
+
+  /* ── Mouse drawing ── */
+  canvas.addEventListener("mousedown", function(e) {
+    var p = getCanvasXY(e);
+    startX = p.x; startY = p.y;
+    isDrawing = true; currentRect = null;
+    canvas.classList.add("is-drawing");
+  });
+  var rafPending = false;
+  canvas.addEventListener("mousemove", function(e) {
+    if (!isDrawing) return;
+    var p = getCanvasXY(e);
+    currentRect = {
+      left: Math.min(startX, p.x), top: Math.min(startY, p.y),
+      width: Math.abs(p.x - startX), height: Math.abs(p.y - startY)
+    };
+    if (!rafPending) {
+      rafPending = true;
+      requestAnimationFrame(function() { rafPending = false; redraw(); });
+    }
+  });
+  window.addEventListener("mouseup", finishDraw);
+
+  /* ── Touch drawing ── */
+  canvas.addEventListener("touchstart", function(e) {
+    e.preventDefault();
+    var p = getTouchXY(e);
+    startX = p.x; startY = p.y;
+    isDrawing = true; currentRect = null;
+    canvas.classList.add("is-drawing");
+  }, {passive: false});
+  canvas.addEventListener("touchmove", function(e) {
+    e.preventDefault();
+    if (!isDrawing) return;
+    var p = getTouchXY(e);
+    currentRect = {
+      left: Math.min(startX, p.x), top: Math.min(startY, p.y),
+      width: Math.abs(p.x - startX), height: Math.abs(p.y - startY)
+    };
+    redraw();
+  }, {passive: false});
+  canvas.addEventListener("touchend", function(e) {
+    e.preventDefault(); finishDraw();
+  }, {passive: false});
+
+  function finishDraw() {
+    if (!isDrawing) return;
+    isDrawing = false;
+    canvas.classList.remove("is-drawing");
+    if (currentRect && currentRect.width > 10 && currentRect.height > 10) {
+      currentRect.type = "rect";
+      rectangles.push(currentRect);
+      setComponentValue(rectangles);
+      updateCount();
+    }
+    currentRect = null;
+    redraw();
+  }
+
+  /* ── Redraw ── */
+  function redraw() {
+    ctx.clearRect(0, 0, naturalW, naturalH);
+    for (var i = 0; i < rectangles.length; i++) {
+      drawRect(rectangles[i], false, i);
+      drawLabel(rectangles[i], i);
+    }
+    if (currentRect) drawRect(currentRect, true, rectangles.length);
+  }
+  function getStrokeForIndex(i) {
+    return (strokeColors && i < strokeColors.length) ? strokeColors[i] : strokeColor;
+  }
+  function getFillForIndex(i) {
+    return (fillColors && i < fillColors.length) ? fillColors[i] : fillColor;
+  }
+  function getLabelForIndex(i) {
+    return (boxLabels && i < boxLabels.length) ? boxLabels[i] : null;
+  }
+  function drawRect(r, isPreview, idx) {
+    var fi = (typeof idx === "number") ? idx : 0;
+    ctx.fillStyle = getFillForIndex(fi);
+    ctx.fillRect(r.left, r.top, r.width, r.height);
+    ctx.strokeStyle = getStrokeForIndex(fi);
+    ctx.lineWidth = strokeWidth;
+    if (isPreview) {
+      ctx.setLineDash([6, 4]);
+    } else {
+      ctx.setLineDash([]);
+    }
+    ctx.strokeRect(r.left, r.top, r.width, r.height);
+    ctx.setLineDash([]);
+  }
+  function drawLabel(r, idx) {
+    var label = getLabelForIndex(idx);
+    var sc = getStrokeForIndex(idx);
+    var x = r.left;
+    if (label) {
+      /* Pill-shaped label with class name — positioned ABOVE the box */
+      ctx.font = "bold 11px -apple-system, BlinkMacSystemFont, sans-serif";
+      var textW = ctx.measureText(label).width;
+      var padH = 6, padV = 4;
+      var pillW = textW + padH * 2;
+      var pillH = 11 + padV * 2;
+      var radius = pillH / 2;
+      var y = r.top - pillH - 4;
+      if (y < 0) y = r.top + 4; /* fall back inside if near top edge */
+      /* Draw rounded rect */
+      ctx.beginPath();
+      ctx.moveTo(x + radius, y);
+      ctx.lineTo(x + pillW - radius, y);
+      ctx.arcTo(x + pillW, y, x + pillW, y + radius, radius);
+      ctx.arcTo(x + pillW, y + pillH, x + pillW - radius, y + pillH, radius);
+      ctx.lineTo(x + radius, y + pillH);
+      ctx.arcTo(x, y + pillH, x, y + pillH - radius, radius);
+      ctx.arcTo(x, y, x + radius, y, radius);
+      ctx.closePath();
+      ctx.fillStyle = sc;
+      ctx.fill();
+      ctx.fillStyle = "#FFFFFF";
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      ctx.fillText(label, x + pillW / 2, y + pillH / 2);
+      ctx.textAlign = "start";
+      ctx.textBaseline = "alphabetic";
+    } else {
+      /* Numbered circle fallback — positioned ABOVE the box */
+      var size = 18;
+      var y = r.top - size - 4;
+      if (y < 0) y = r.top + 4;
+      ctx.beginPath();
+      ctx.arc(x + size / 2, y + size / 2, size / 2, 0, Math.PI * 2);
+      ctx.fillStyle = sc;
+      ctx.fill();
+      ctx.fillStyle = "#FFFFFF";
+      ctx.font = "bold 11px -apple-system, BlinkMacSystemFont, sans-serif";
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      ctx.fillText((idx + 1).toString(), x + size / 2, y + size / 2);
+      ctx.textAlign = "start";
+      ctx.textBaseline = "alphabetic";
+    }
+  }
+  function updateCount() {
+    var n = rectangles.length;
+    countEl.textContent = n > 0 ? n + " marker" + (n > 1 ? "s" : "") : "";
+    countEl.classList.toggle("has-rects", n > 0);
+  }
+
+  /* ── Toolbar ── */
+  document.getElementById("undo-btn").addEventListener("click", function() {
+    rectangles.pop(); setComponentValue(rectangles); updateCount(); redraw();
+  });
+  document.getElementById("clear-btn").addEventListener("click", function() {
+    rectangles = []; setComponentValue(rectangles); updateCount(); redraw();
+  });
+
+  /* ── Keyboard shortcuts ── */
+  window.addEventListener("keydown", function(e) {
+    /* Ctrl+Z / Cmd+Z → Undo */
+    if ((e.ctrlKey || e.metaKey) && e.key === "z") {
+      e.preventDefault();
+      if (rectangles.length > 0) {
+        rectangles.pop(); setComponentValue(rectangles); updateCount(); redraw();
+      }
+    }
+    /* Escape → Cancel current draw */
+    if (e.key === "Escape" && isDrawing) {
+      isDrawing = false;
+      currentRect = null;
+      canvas.classList.remove("is-drawing");
+      redraw();
+    }
+  });
+
+  /* ── Platform-aware shortcut hint ── */
+  var platform = (navigator.userAgentData && navigator.userAgentData.platform) || navigator.platform || "";
+  var isMac = /Mac|iPod|iPhone|iPad/i.test(platform);
+  document.getElementById("undo-shortcut").innerHTML =
+    "&thinsp;" + (isMac ? "&#8984;" : "Ctrl+") + "Z";
+
+  /* ── Ready ── */
+  sendReady();
+})();
+</script>
+</body>
+</html>

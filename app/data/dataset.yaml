@@ -1,0 +1,6 @@
+path: /Users/jonathanbrown/Desktop/éo_v2/app/data
+train: images/train
+val: images/val
+
+names:
+  0: CSP

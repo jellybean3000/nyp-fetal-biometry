@@ -1,0 +1,31 @@
+# Source datasets (raw — images copied to app/images/)
+Orginal_train_images_to_959_661/
+Test-Dataset-YOLO/
+Trans-thalamic/
+Trans-thalamic-orginal-size/
+
+# Training artifacts
+app/data/images/
+app/data/labels/
+app/data/*.cache
+app/models/runs/
+
+# Pretrained base model (downloaded at training time)
+app/yolov8n.pt
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+
+# Cold start annotations (user data)
+app/cold_start_annotations/
+
+# Documentation PDFs
+*.pdf
+
+# OS
+.DS_Store
+
+# Errors
+errors/

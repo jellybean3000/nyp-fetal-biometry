@@ -1,0 +1,1381 @@
+/* ═══════════════════════════════════════════════════════════════════════
+   NYP Fetal Biometry — Design System v3
+   Typography: SF Pro scale · Spacing: 4px grid · Contrast: WCAG AA
+
+   NOTE — !important:
+   Streamlit injects aggressive inline styles and default theme CSS.
+   Most !important declarations here are required to override those
+   defaults. This is the standard pattern for custom-styled Streamlit
+   apps and is NOT a specificity anti-pattern.
+   ═══════════════════════════════════════════════════════════════════════ */
+
+/* ── Design Tokens ───────────────────────────────────────────────────── */
+:root {
+    /* Surfaces */
+    --color-bg-primary: #FFFFFF;
+    --color-bg-secondary: #F5F5F7;
+    --color-bg-tertiary: #E8E8ED;
+    /* Text — contrast-checked against white
+       Primary  #1D1D1F  → 17:1
+       Secondary #6E6E73 → 4.8:1  (AA normal ✓)
+       Tertiary  #86868B → 3.9:1  (AA large ✓, use ≥ 12px semibold) */
+    --color-text-primary: #1D1D1F;
+    --color-text-secondary: #6E6E73;
+    --color-text-tertiary: #86868B;
+
+    /* Semantic Colors — LOCKED meanings across all screens & states */
+    --color-blue: #007AFF;
+    --color-blue-hover: #0066D6;
+    --color-blue-bg: rgba(0, 122, 255, 0.07);
+    --color-green: #34C759;
+    --color-green-bg: rgba(52, 199, 89, 0.10);
+    --color-green-text: #248A3D;
+    --color-orange: #FF9500;
+    --color-orange-bg: rgba(255, 149, 0, 0.10);
+    --color-orange-text: #C77800;
+    --color-red: #FF3B30;
+    --color-red-bg: rgba(255, 59, 48, 0.10);
+    --color-red-text: #D70015;
+
+    /* AI identity — intentionally duplicates --color-blue as the gradient
+       start so AI styling stays in sync with the brand blue.  If the brand
+       palette ever diverges from the AI palette, update these separately. */
+    --color-ai-from: #007AFF;
+    --color-ai-to: #5AC8FA;
+    --color-ai-glow: rgba(0, 122, 255, 0.15);
+
+    /* Borders & Shadows */
+    --color-divider: rgba(0, 0, 0, 0.06);
+    --color-divider-strong: rgba(0, 0, 0, 0.10);
+    --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.04);
+    --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.04);
+    --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.08);
+    --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.12);
+    --shadow-xl: 0 16px 48px rgba(0, 0, 0, 0.16);
+
+    /* Radii — 4px based */
+    --radius-xs: 4px;
+    --radius-sm: 8px;
+    --radius-md: 12px;
+    --radius-lg: 16px;
+    --radius-xl: 20px;
+    --radius-full: 9999px;
+
+    /* Typography
+       Scale: 11 / 12 / 13 / 14 / 15 / 17 / 20 / 22 / 28 px
+       Mapped: 0.6875 / 0.75 / 0.8125 / 0.875 / 0.9375 / 1.0625 / 1.25 / 1.375 / 1.75 rem */
+    --font-stack: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text",
+        "Helvetica Neue", Helvetica, Arial, sans-serif;
+    --font-mono: "SF Mono", SFMono-Regular, ui-monospace, Menlo, monospace;
+
+    /* Motion */
+    --ease-default: cubic-bezier(0.25, 0.1, 0.25, 1);
+    --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+    --ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
+    --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+    --duration-fast: 150ms;
+    --duration-normal: 250ms;
+    --duration-slow: 400ms;
+    --duration-ai-breathe: 2.4s;
+}
+
+
+/* ═══════════════════════════════════════════════════════════════════════
+   Keyframes
+   ═══════════════════════════════════════════════════════════════════════ */
+
+@keyframes ai-breathe {
+    0%, 100% { opacity: 0.55; transform: scale(0.96); }
+    50%      { opacity: 1;    transform: scale(1);     }
+}
+
+@keyframes ai-gradient-shift {
+    0%, 100% { background-position: 0% 50%;   }
+    50%      { background-position: 100% 50%; }
+}
+
+@keyframes pulse-ring {
+    0%   { transform: scale(1);   opacity: 0.45; }
+    100% { transform: scale(2.2); opacity: 0;    }
+}
+
+@keyframes confidence-fill {
+    from { transform: scaleX(0); }
+    to   { transform: scaleX(1); }
+}
+
+@keyframes shimmer {
+    0%   { background-position: -200% 0; }
+    100% { background-position: 200% 0;  }
+}
+
+@keyframes fade-in-up {
+    from { opacity: 0; transform: translateY(8px); }
+    to   { opacity: 1; transform: translateY(0);   }
+}
+
+@keyframes fade-in {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+}
+
+@keyframes scale-in {
+    from { opacity: 0; transform: scale(0.92); }
+    to   { opacity: 1; transform: scale(1);    }
+}
+
+@keyframes confetti-drift {
+    0%   { transform: translateY(0) rotate(0deg); opacity: 1; }
+    100% { transform: translateY(-36px) rotate(180deg); opacity: 0; }
+}
+
+@keyframes glow-pulse {
+    0%, 100% { opacity: 0.4; }
+    50%      { opacity: 1;   }
+}
+
+
+/* ═══════════════════════════════════════════════════════════════════════
+   Global
+   ═══════════════════════════════════════════════════════════════════════ */
+
+.stApp {
+    background-color: var(--color-bg-secondary) !important;
+    color: var(--color-text-primary);
+    font-family: var(--font-stack);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+/* Hide Streamlit top decoration bar (black stripe) */
+[data-testid="stDecoration"] {
+    display: none !important;
+}
+
+/* Make Streamlit header transparent so it doesn't obscure content */
+[data-testid="stHeader"] {
+    background-color: transparent !important;
+}
+
+
+/* ═══════════════════════════════════════════════════════════════════════
+   Sidebar — Frosted Glass
+   ═══════════════════════════════════════════════════════════════════════ */
+
+section[data-testid="stSidebar"] {
+    background: rgba(255, 255, 255, 0.78) !important;
+    backdrop-filter: blur(24px) saturate(180%);
+    -webkit-backdrop-filter: blur(24px) saturate(180%);
+    border-right: 1px solid var(--color-divider) !important;
+}
+
+section[data-testid="stSidebar"] > div:first-child {
+    background: transparent !important;
+    padding-top: 24px;
+}
+
+section[data-testid="stSidebar"] .stMarkdown h1 {
+    color: var(--color-text-primary) !important;
+    font-size: 1.25rem;       /* 20px — title3 */
+    font-weight: 700;
+    letter-spacing: -0.025em;
+    line-height: 1.2;
+    margin-bottom: 0 !important;
+}
+
+section[data-testid="stSidebar"] .stCaption,
+section[data-testid="stSidebar"] [data-testid="stCaptionContainer"] {
+    color: var(--color-text-tertiary) !important;
+    font-size: 0.75rem !important;  /* 12px — caption */
+    letter-spacing: 0.01em;
+    line-height: 1.4;
+}
+
+
+/* ═══════════════════════════════════════════════════════════════════════
+   Typography — SF Pro scale
+   ═══════════════════════════════════════════════════════════════════════ */
+
+h1, h2, h3, h4 {
+    color: var(--color-text-primary) !important;
+    font-family: var(--font-stack);
+    letter-spacing: -0.025em;
+}
+
+h1 { font-weight: 700 !important; font-size: 1.375rem !important; line-height: 1.15; margin-bottom: 0 !important; }   /* 22px — compact */
+h2 { font-weight: 600 !important; font-size: 1.25rem !important; line-height: 1.2; margin-bottom: 0 !important; }      /* 20px — title3 */
+h3 { font-weight: 600 !important; font-size: 1.0625rem !important; line-height: 1.25; } /* 17px — headline */
+
+p, span, label, .stMarkdown {
+    color: var(--color-text-primary);
+    font-family: var(--font-stack);
+}
+
+
+/* ═══════════════════════════════════════════════════════════════════════
+   Main Content Area
+   ═══════════════════════════════════════════════════════════════════════ */
+
+.main .block-container {
+    background-color: var(--color-bg-primary);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
+    padding: 20px 32px 16px !important;   /* compact: 5× / 8× / 4× */
+    max-width: 1100px;
+    animation: fade-in var(--duration-slow) var(--ease-default) both;
+}
+
+
+/* ── Compact vertical rhythm — reduce Streamlit default gaps ────────── */
+.main .block-container [data-testid="stVerticalBlock"] > [data-testid="stVerticalBlockBorderWrapper"] {
+    gap: 0 !important;
+}
+.main .block-container [data-testid="stVerticalBlock"] {
+    gap: 0.35rem !important;
+}
+
+
+/* ═══════════════════════════════════════════════════════════════════════
+   Buttons
+   ═══════════════════════════════════════════════════════════════════════ */
+
+.stButton > button {
+    border-radius: var(--radius-sm) !important;
+    font-weight: 500;
+    font-family: var(--font-stack);
+    font-size: 0.8125rem;      /* 13px — compact */
+    line-height: 1.2;
+    padding: 6px 16px;         /* compact */
+    border: 1px solid var(--color-divider) !important;
+    background-color: var(--color-bg-primary) !important;
+    color: var(--color-text-primary) !important;
+    transition: all var(--duration-normal) var(--ease-default);
+    box-shadow: var(--shadow-xs);
+    cursor: pointer;
+}
+
+.stButton > button:hover {
+    box-shadow: var(--shadow-sm);
+    border-color: var(--color-divider-strong) !important;
+    background-color: var(--color-bg-secondary) !important;
+}
+
+.stButton > button:active {
+    transform: scale(0.98);
+    box-shadow: var(--shadow-xs);
+    transition-duration: var(--duration-fast);
+}
+
+/* Primary */
+.stButton > button[kind="primary"],
+.stButton > button[data-testid="stBaseButton-primary"] {
+    background-color: var(--color-blue) !important;
+    border-color: var(--color-blue) !important;
+    color: #FFFFFF !important;
+    box-shadow: var(--shadow-sm), 0 2px 8px rgba(0, 122, 255, 0.18);
+    font-weight: 600;
+}
+
+.stButton > button[kind="primary"]:hover,
+.stButton > button[data-testid="stBaseButton-primary"]:hover {
+    background-color: var(--color-blue-hover) !important;
+    border-color: var(--color-blue-hover) !important;
+    box-shadow: var(--shadow-md), 0 4px 12px rgba(0, 122, 255, 0.24);
+}
+
+.stButton > button[kind="primary"]:active,
+.stButton > button[data-testid="stBaseButton-primary"]:active {
+    transform: scale(0.97);
+    box-shadow: var(--shadow-sm), 0 2px 8px rgba(0, 122, 255, 0.16);
+}
+
+/* Secondary */
+.stButton > button[kind="secondary"],
+.stButton > button[data-testid="stBaseButton-secondary"] {
+    background-color: var(--color-bg-secondary) !important;
+    border-color: var(--color-divider) !important;
+    color: var(--color-text-secondary) !important;
+    box-shadow: none;
+    font-weight: 500;
+}
+
+.stButton > button[kind="secondary"]:hover,
+.stButton > button[data-testid="stBaseButton-secondary"]:hover {
+    background-color: var(--color-bg-tertiary) !important;
+    color: var(--color-text-primary) !important;
+    box-shadow: var(--shadow-xs);
+}
+
+/* Focus ring — keyboard accessibility */
+.stButton > button:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 4px rgba(0, 122, 255, 0.24) !important;
+}
+
+/* Disabled */
+.stButton > button:disabled {
+    opacity: 0.38 !important;
+    cursor: not-allowed;
+    transform: none !important;
+    box-shadow: none !important;
+}
+
+
+/* ═══════════════════════════════════════════════════════════════════════
+   Segmented Control (Radio as Tabs)
+   ═══════════════════════════════════════════════════════════════════════ */
+
+div[data-testid="stRadio"] > label {
+    font-size: 0.6875rem !important;  /* 11px — caption2 */
+    color: var(--color-text-tertiary) !important;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    line-height: 1.3;
+    margin-bottom: 8px !important;    /* 2× */
+}
+
+div[data-testid="stRadio"] > div {
+    display: flex;
+    background: var(--color-bg-tertiary);
+    border-radius: var(--radius-sm);
+    padding: 4px;              /* 1× */
+    gap: 0;
+}
+
+div[data-testid="stRadio"] > div > label {
+    flex: 1;
+    text-align: center;
+    padding: 8px 12px !important;     /* 2× / 3× */
+    border-radius: var(--radius-xs);
+    font-size: 0.8125rem !important;  /* 13px — footnote */
+    font-weight: 500;
+    line-height: 1.2;
+    color: var(--color-text-secondary) !important;
+    transition: all var(--duration-normal) var(--ease-out);
+    cursor: pointer;
+    margin: 0 !important;
+    background: transparent;
+}
+
+div[data-testid="stRadio"] > div > label[data-checked="true"],
+div[data-testid="stRadio"] > div > label:has(input:checked) {
+    background: var(--color-bg-primary);
+    color: var(--color-text-primary) !important;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.04);
+    font-weight: 600;
+}
+
+
+/* ═══════════════════════════════════════════════════════════════════════
+   Metrics
+   ═══════════════════════════════════════════════════════════════════════ */
+
+[data-testid="stMetricValue"] {
+    color: var(--color-blue) !important;
+    font-size: 1.75rem !important;  /* 28px — title1 */
+    font-weight: 700;
+    line-height: 1.15;
+    font-family: var(--font-stack);
+}
+
+[data-testid="stMetricLabel"] {
+    color: var(--color-text-secondary) !important;
+    font-size: 0.75rem;        /* 12px — caption */
+    line-height: 1.4;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
+
+/* ═══════════════════════════════════════════════════════════════════════
+   Progress Bar
+   ═══════════════════════════════════════════════════════════════════════ */
+
+.stProgress > div > div > div {
+    background: linear-gradient(90deg, var(--color-blue), var(--color-ai-to)) !important;
+    border-radius: 4px;        /* 1× */
+    transition: width 600ms var(--ease-out);
+}
+
+.stProgress > div > div {
+    background-color: var(--color-bg-tertiary) !important;
+    border-radius: 4px;        /* 1× */
+    height: 4px !important;    /* 1× */
+    overflow: hidden;
+}
+
+
+/* ═══════════════════════════════════════════════════════════════════════
+   Alerts
+   ═══════════════════════════════════════════════════════════════════════ */
+
+.stAlert {
+    border-radius: var(--radius-sm) !important;
+    border: none !important;
+    font-size: 0.875rem;       /* 14px */
+    line-height: 1.5;
+    animation: fade-in-up var(--duration-slow) var(--ease-out) both;
+}
+
+div[data-testid="stAlertContentSuccess"] {
+    background-color: var(--color-green-bg) !important;
+    color: var(--color-green-text) !important;
+}
+
+div[data-testid="stAlertContentWarning"] {
+    background-color: var(--color-orange-bg) !important;
+    color: var(--color-orange-text) !important;
+}
+
+div[data-testid="stAlertContentError"] {
+    background-color: var(--color-red-bg) !important;
+    color: var(--color-red-text) !important;
+}
+
+div[data-testid="stAlertContentInfo"] {
+    background-color: var(--color-blue-bg) !important;
+    color: var(--color-blue) !important;
+}
+
+
+/* ═══════════════════════════════════════════════════════════════════════
+   Dialog / Modal
+   ═══════════════════════════════════════════════════════════════════════ */
+
+div[data-testid="stDialog"] > div {
+    border-radius: var(--radius-xl) !important;
+    box-shadow: var(--shadow-xl);
+    border: none !important;
+    overflow: hidden;
+    animation: scale-in var(--duration-slow) var(--ease-spring) both;
+}
+
+div[data-testid="stModal"]::before {
+    backdrop-filter: blur(16px) saturate(160%);
+    -webkit-backdrop-filter: blur(16px) saturate(160%);
+}
+
+
+/* ═══════════════════════════════════════════════════════════════════════
+   Cards
+   ═══════════════════════════════════════════════════════════════════════ */
+
+/* ── Counter Card ───────────────────────────────────────────────────── */
+
+.nyp-counter-card {
+    background: var(--color-bg-primary);
+    border-radius: var(--radius-md);
+    padding: 20px 16px;       /* 5× / 4× */
+    box-shadow: var(--shadow-xs);
+    border: 1px solid var(--color-divider);
+    text-align: center;
+    transition: all var(--duration-slow) var(--ease-default);
+}
+
+.nyp-counter-card .count {
+    font-size: 1.75rem;       /* 28px — title1 */
+    font-weight: 700;
+    color: var(--color-blue);
+    line-height: 1.15;
+    font-family: var(--font-stack);
+    letter-spacing: -0.02em;
+    font-variant-numeric: tabular-nums;
+    transition: color var(--duration-normal) var(--ease-default);
+}
+
+.nyp-counter-card .label {
+    font-size: 0.6875rem;     /* 11px — caption2 */
+    color: var(--color-text-tertiary);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    font-weight: 600;
+    line-height: 1.3;
+    margin-top: 8px;           /* 2× */
+}
+
+.nyp-counter-card .denominator {
+    font-size: 0.8125rem;     /* 13px — footnote */
+    color: var(--color-text-tertiary);
+    font-weight: 400;
+}
+
+.nyp-counter-card.near-threshold {
+    position: relative;
+    border-color: rgba(0, 122, 255, 0.20);
+    box-shadow: var(--shadow-xs);
+}
+
+.nyp-counter-card.near-threshold::after {
+    content: "";
+    position: absolute;
+    inset: -1px;
+    border-radius: inherit;
+    border: 2px solid rgba(0, 122, 255, 0.25);
+    pointer-events: none;
+    animation: glow-pulse 2s var(--ease-in-out) infinite;
+}
+
+.nyp-counter-card.threshold-reached {
+    border-color: rgba(52, 199, 89, 0.25);
+    box-shadow: var(--shadow-sm), 0 0 0 1px rgba(52, 199, 89, 0.10),
+                0 0 16px rgba(52, 199, 89, 0.06);
+}
+
+.nyp-counter-card.threshold-reached .count {
+    color: var(--color-green);
+}
+
+.nyp-counter-breakdown {
+    display: flex;
+    justify-content: center;
+    gap: 16px;                 /* 4× */
+    margin-top: 8px;           /* 2× */
+    padding-top: 8px;
+    border-top: 1px solid var(--color-divider);
+}
+
+.nyp-counter-breakdown .breakdown-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;                  /* 1× */
+    font-size: 0.6875rem;     /* 11px — caption2 */
+    color: var(--color-text-secondary);
+    font-weight: 500;
+    font-family: var(--font-stack);
+    letter-spacing: 0.01em;
+}
+
+.nyp-counter-breakdown .breakdown-item strong {
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+}
+
+.nyp-counter-breakdown .breakdown-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+
+/* ── Class Legend Pill ────────────────────────────────────────────────── */
+
+.nyp-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;                  /* 2× */
+    padding: 4px 12px 4px 8px; /* 1× / 3× / 1× / 2× */
+    border-radius: var(--radius-full);
+    font-size: 0.75rem;       /* 12px — caption */
+    font-weight: 600;
+    font-family: var(--font-stack);
+    letter-spacing: 0.01em;
+    line-height: 1.3;
+    margin-bottom: 4px;        /* 1× */
+    margin-right: 4px;         /* 1× */
+}
+
+.nyp-pill .dot {
+    width: 8px;                /* 2× */
+    height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+
+/* ── Detection Card ──────────────────────────────────────────────────── */
+
+.nyp-detection-card {
+    display: flex;
+    align-items: center;
+    gap: 8px;                  /* 2× */
+    padding: 8px 12px;         /* 2× / 3× */
+    background: var(--color-bg-secondary);
+    border-radius: var(--radius-sm);
+    margin-bottom: 4px;        /* 1× */
+    font-family: var(--font-stack);
+    border: 1px solid var(--color-divider);
+    animation: fade-in-up var(--duration-slow) var(--ease-out) both;
+    transition: background var(--duration-fast) var(--ease-default);
+}
+
+.nyp-detection-card:nth-child(1) { animation-delay: 0ms; }
+.nyp-detection-card:nth-child(2) { animation-delay: 80ms; }
+.nyp-detection-card:nth-child(3) { animation-delay: 160ms; }
+
+.nyp-detection-card:hover {
+    background: var(--color-bg-tertiary);
+}
+
+.nyp-detection-card .det-color {
+    width: 4px;                /* 1× */
+    height: 24px;              /* 6× */
+    border-radius: 2px;
+    flex-shrink: 0;
+}
+
+.nyp-detection-card .det-name {
+    font-weight: 600;
+    font-size: 0.875rem;      /* 14px */
+    line-height: 1.2;
+    color: var(--color-text-primary);
+    letter-spacing: -0.01em;
+}
+
+.nyp-detection-card .det-conf-group {
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+    gap: 8px;                  /* 2× */
+}
+
+.nyp-detection-card .det-conf {
+    font-size: 0.75rem;       /* 12px — caption */
+    font-weight: 600;
+    padding: 4px 8px;          /* 1× / 2× */
+    border-radius: var(--radius-xs);
+    font-family: var(--font-mono);
+    letter-spacing: 0.02em;
+    line-height: 1.2;
+}
+
+
+/* ── Confidence Bar ──────────────────────────────────────────────────── */
+
+.nyp-confidence-bar {
+    width: 48px;               /* 12× */
+    height: 4px;               /* 1× */
+    border-radius: 2px;
+    background: var(--color-bg-tertiary);
+    overflow: hidden;
+    flex-shrink: 0;
+}
+
+.nyp-confidence-bar-fill {
+    height: 100%;
+    border-radius: 2px;
+    transform-origin: left center;
+    animation: confidence-fill 600ms var(--ease-out) both;
+}
+
+
+/* ═══════════════════════════════════════════════════════════════════════
+   AI Components
+   Motion hierarchy: the AI orb is the primary animated signal. Other
+   infinite animations (counter-card glow) should only run when the orb
+   is off-screen to avoid competing for visual attention.
+   ═══════════════════════════════════════════════════════════════════════ */
+
+/* ── AI Thinking Indicator ─────────────────────────────────────────── */
+
+.nyp-ai-thinking {
+    display: flex;
+    align-items: center;
+    gap: 12px;                 /* 3× */
+    padding: 16px 20px;        /* 4× / 5× */
+    background: linear-gradient(
+        135deg,
+        rgba(0, 122, 255, 0.05),
+        rgba(90, 200, 250, 0.05)
+    );
+    border: 1px solid rgba(0, 122, 255, 0.10);
+    border-radius: var(--radius-md);
+    margin: 12px 0;            /* 3× */
+}
+
+.nyp-ai-orb-container {
+    position: relative;
+    width: 24px;               /* 6× */
+    height: 24px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.nyp-ai-orb {
+    width: 16px;               /* 4× */
+    height: 16px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--color-ai-from), var(--color-ai-to));
+    background-size: 200% 200%;
+    animation:
+        ai-breathe var(--duration-ai-breathe) var(--ease-in-out) infinite,
+        ai-gradient-shift 3s ease-in-out infinite;
+    box-shadow: 0 0 12px var(--color-ai-glow);
+    position: relative;
+    z-index: 1;
+}
+
+.nyp-ai-orb-container::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--color-ai-from), var(--color-ai-to));
+    opacity: 0.35;
+    animation: pulse-ring var(--duration-ai-breathe) var(--ease-out) infinite;
+    z-index: 0;
+}
+
+.nyp-ai-thinking-text {
+    font-size: 0.875rem;      /* 14px */
+    line-height: 1.4;
+    color: var(--color-text-secondary);
+    font-weight: 500;
+}
+
+
+/* ── AI Prompt Card ────────────────────────────────────────────────── */
+
+.nyp-ai-prompt {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;                  /* 2× */
+    padding: 8px 16px;         /* 2× / 4× */
+    background: linear-gradient(
+        135deg,
+        rgba(0, 122, 255, 0.04),
+        rgba(90, 200, 250, 0.04)
+    );
+    border: 1px solid rgba(0, 122, 255, 0.10);
+    border-radius: var(--radius-sm);
+    margin: 8px 0;             /* 2× */
+    animation: fade-in-up var(--duration-slow) var(--ease-out) both;
+    position: relative;
+    overflow: hidden;
+}
+
+.nyp-ai-prompt::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+        90deg,
+        transparent 0%,
+        rgba(0, 122, 255, 0.04) 40%,
+        rgba(90, 200, 250, 0.06) 60%,
+        transparent 100%
+    );
+    background-size: 200% 100%;
+    animation: shimmer 4s ease-in-out 1;      /* single pass — direct attention, then stop */
+    pointer-events: none;
+}
+
+.nyp-ai-prompt .prompt-icon {
+    width: 24px;               /* 6× */
+    height: 24px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--color-ai-from), var(--color-ai-to));
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 8px var(--color-ai-glow);
+}
+
+.nyp-ai-prompt .prompt-icon svg {
+    width: 12px;
+    height: 12px;
+}
+
+.nyp-ai-prompt .prompt-text {
+    font-size: 0.875rem;      /* 14px */
+    color: var(--color-text-primary);
+    line-height: 1.5;
+    font-weight: 400;
+    position: relative;
+    z-index: 1;
+}
+
+.nyp-ai-prompt .prompt-text strong {
+    font-weight: 600;
+}
+
+
+/* ── AI Status Badge ─────────────────────────────────────────────────── */
+
+.nyp-ai-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;                  /* 2× */
+    font-size: 0.75rem;       /* 12px — caption */
+    font-weight: 600;
+    padding: 4px 12px 4px 8px; /* 1× / 3× / 1× / 2× */
+    border-radius: var(--radius-full);
+    animation: fade-in-up var(--duration-slow) var(--ease-out) both;
+    letter-spacing: 0.01em;
+    line-height: 1.3;
+    transition: all var(--duration-normal) var(--ease-default);
+}
+
+.nyp-ai-status .status-dot {
+    width: 8px;                /* 2× */
+    height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+.nyp-ai-status.status-none {
+    background: var(--color-orange-bg);
+    color: var(--color-orange-text);
+}
+
+.nyp-ai-status.status-none .status-dot {
+    background: var(--color-orange);
+}
+
+
+/* ═══════════════════════════════════════════════════════════════════════
+   Empty & Error States
+   ═══════════════════════════════════════════════════════════════════════ */
+
+/* No-detection card */
+.nyp-no-detect {
+    text-align: center;
+    padding: 8px 16px;        /* 2× / 4× */
+    background: var(--color-bg-secondary);
+    border-radius: var(--radius-sm);
+    border: 1px dashed var(--color-divider-strong);
+    margin: 8px 0;             /* 2× */
+    animation: fade-in var(--duration-slow) var(--ease-default) both;
+}
+
+.nyp-no-detect .no-detect-icon {
+    width: 32px;               /* 8× — reduced from 44px */
+    height: 32px;
+    border-radius: 50%;
+    background: var(--color-orange-bg);
+    margin: 0 auto 8px;       /* 2× */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.nyp-no-detect .no-detect-icon svg {
+    width: 14px;               /* reduced from 20px */
+    height: 14px;
+}
+
+.nyp-no-detect .no-detect-title {
+    font-size: 0.8125rem;     /* 13px — footnote (demoted from 15px subhead) */
+    font-weight: 600;
+    color: var(--color-text-primary);
+    line-height: 1.3;
+    margin-bottom: 2px;
+}
+
+.nyp-no-detect .no-detect-desc {
+    font-size: 0.75rem;       /* 12px — caption (demoted from 13px footnote) */
+    color: var(--color-text-secondary);
+    line-height: 1.4;
+}
+
+.nyp-no-detect .no-detect-desc strong {
+    font-weight: 600;
+    color: var(--color-text-primary);
+}
+
+/* Error state */
+.nyp-error-state {
+    text-align: center;
+    padding: 32px 20px;       /* 8× / 5× */
+    background: var(--color-red-bg);
+    border-radius: var(--radius-md);
+    border: 1px solid rgba(255, 59, 48, 0.12);
+    margin: 12px 0;            /* 3× */
+    animation: fade-in var(--duration-slow) var(--ease-default) both;
+}
+
+.nyp-error-state .error-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: rgba(255, 59, 48, 0.12);
+    margin: 0 auto 12px;      /* 3× */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.nyp-error-state .error-icon svg {
+    width: 20px;
+    height: 20px;
+}
+
+.nyp-error-state .error-title {
+    font-size: 0.9375rem;     /* 15px — subhead */
+    font-weight: 600;
+    color: var(--color-red-text);
+    line-height: 1.3;
+    margin-bottom: 4px;        /* 1× */
+}
+
+.nyp-error-state .error-desc {
+    font-size: 0.8125rem;     /* 13px — footnote */
+    color: var(--color-text-secondary);
+    line-height: 1.5;
+}
+
+
+/* ── Page Subtitle ──────────────────────────────────────────────────── */
+
+.nyp-page-subtitle {
+    font-size: 0.8125rem;     /* 13px — compact */
+    color: var(--color-text-secondary);
+    font-weight: 400;
+    line-height: 1.4;
+    margin: 0 0 8px;            /* 2× below header — compact */
+    letter-spacing: 0;
+}
+
+
+/* ═══════════════════════════════════════════════════════════════════════
+   Navigation
+   ═══════════════════════════════════════════════════════════════════════ */
+
+.nyp-nav-info {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;                  /* 2× */
+    min-height: 32px;          /* 8× */
+    text-align: center;
+    color: var(--color-text-secondary);
+    font-size: 0.8125rem;     /* 13px — footnote */
+    font-weight: 500;
+    line-height: 1.2;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: 0.01em;
+}
+
+.nyp-saved-badge {
+    font-size: 0.6875rem;     /* 11px — caption2 */
+    font-weight: 600;
+    color: var(--color-green-text);
+    background: var(--color-green-bg);
+    padding: 2px 8px;         /* 0.5× / 2× */
+    border-radius: var(--radius-full);
+    letter-spacing: 0.01em;
+    line-height: 1.3;
+}
+
+
+/* ═══════════════════════════════════════════════════════════════════════
+   Workflow Hints
+   ═══════════════════════════════════════════════════════════════════════ */
+
+.nyp-step-hint {
+    display: flex;
+    align-items: center;
+    gap: 8px;                  /* 2× */
+    padding: 8px 12px;         /* 2× / 3× */
+    background: var(--color-bg-secondary);
+    border-radius: var(--radius-sm);
+    font-size: 0.8125rem;     /* 13px — footnote */
+    color: var(--color-text-secondary);
+    font-weight: 500;
+    line-height: 1.4;
+    margin: 8px 0;             /* 2× */
+    border: 1px solid var(--color-divider);
+    animation: fade-in-up var(--duration-slow) var(--ease-out) both;
+}
+
+.nyp-step-hint strong {
+    font-weight: 600;
+    color: var(--color-text-primary);
+}
+
+.nyp-step-hint .step-num {
+    width: 20px;               /* 5× */
+    height: 20px;
+    border-radius: 50%;
+    background: var(--color-blue);
+    color: white;
+    font-size: 0.6875rem;     /* 11px */
+    font-weight: 700;
+    line-height: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    box-shadow: 0 2px 8px rgba(0, 122, 255, 0.20);
+}
+
+
+/* ═══════════════════════════════════════════════════════════════════════
+   Milestone Celebration
+   ═══════════════════════════════════════════════════════════════════════ */
+
+.nyp-milestone {
+    text-align: center;
+    padding: 8px 0 20px;      /* 2× / 0 / 5× */
+    position: relative;
+    overflow: hidden;
+}
+
+.nyp-milestone::before,
+.nyp-milestone::after {
+    content: "";
+    position: absolute;
+    width: 8px;                /* 2× */
+    height: 8px;
+    border-radius: 50%;
+    animation: confetti-drift 1.8s var(--ease-out) both;
+}
+
+.nyp-milestone::before {
+    background: var(--color-green);
+    left: 30%;
+    bottom: 60%;
+    animation-delay: 0.2s;
+}
+
+.nyp-milestone::after {
+    background: var(--color-blue);
+    right: 28%;
+    bottom: 55%;
+    animation-delay: 0.4s;
+}
+
+.nyp-milestone-icon {
+    width: 56px;               /* 14× */
+    height: 56px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--color-green), #30D158);
+    margin: 0 auto 20px;      /* 5× */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 20px rgba(52, 199, 89, 0.30),
+                0 0 0 8px rgba(52, 199, 89, 0.08);  /* 2× ring */
+    animation: scale-in var(--duration-slow) var(--ease-spring) both;
+}
+
+.nyp-milestone-icon svg {
+    width: 24px;               /* 6× */
+    height: 24px;
+}
+
+.nyp-milestone-title {
+    font-size: 1.25rem;       /* 20px — title3 */
+    font-weight: 700;
+    color: var(--color-text-primary);
+    letter-spacing: -0.02em;
+    line-height: 1.2;
+    margin-bottom: 8px;        /* 2× */
+}
+
+.nyp-milestone-desc {
+    font-size: 0.875rem;      /* 14px */
+    color: var(--color-text-secondary);
+    line-height: 1.5;
+    max-width: 340px;
+    margin: 0 auto;
+}
+
+
+/* ── Sidebar Divider ─────────────────────────────────────────────────── */
+
+.nyp-sidebar-divider {
+    height: 1px;
+    background: var(--color-divider);
+    margin: 12px 0;           /* 3× */
+    border: none;
+}
+
+
+/* ── Sidebar Brand Lockup ──────────────────────────────────────────── */
+
+.nyp-brand {
+    display: flex;
+    align-items: center;
+    gap: 12px;                 /* 3× */
+    margin-bottom: 4px;        /* 1× */
+}
+
+.nyp-brand-icon {
+    width: 40px;               /* 10× */
+    height: 40px;
+    border-radius: var(--radius-sm);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    overflow: hidden;
+}
+
+.nyp-brand-icon svg {
+    width: 40px;
+    height: 40px;
+}
+
+.nyp-brand-text {
+    font-size: 1.25rem;       /* 20px — title3 */
+    font-weight: 700;
+    color: var(--color-text-primary);
+    letter-spacing: -0.025em;
+    line-height: 1.2;
+}
+
+.nyp-brand-sub {
+    font-size: 0.75rem;       /* 12px — caption */
+    color: var(--color-text-tertiary);
+    font-weight: 600;
+    letter-spacing: 0.01em;
+    line-height: 1.3;
+}
+
+
+/* ── Mode Description ─────────────────────────────────────────────── */
+
+.nyp-mode-desc {
+    font-size: 0.75rem;       /* 12px — caption */
+    color: var(--color-text-tertiary);
+    font-weight: 500;
+    line-height: 1.4;
+    margin: 4px 0 0;           /* 1× above */
+    letter-spacing: 0;
+}
+
+
+/* ═══════════════════════════════════════════════════════════════════════
+   Utility Overrides
+   ═══════════════════════════════════════════════════════════════════════ */
+
+.stCaption, [data-testid="stCaptionContainer"] {
+    color: var(--color-text-tertiary) !important;
+    font-size: 0.75rem !important;  /* 12px */
+    line-height: 1.4;
+}
+
+.stSpinner > div {
+    border-color: var(--color-blue) transparent transparent transparent !important;
+}
+
+/* Firefox scrollbar */
+* {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(0, 0, 0, 0.12) transparent;
+}
+
+/* WebKit scrollbar */
+::-webkit-scrollbar {
+    width: 8px;                /* 2× */
+    height: 8px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: rgba(0, 0, 0, 0.12);
+    border-radius: 4px;        /* 1× */
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: rgba(0, 0, 0, 0.20);
+}
+
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+[data-testid="stTooltipContent"] {
+    font-family: var(--font-stack);
+    font-size: 0.8125rem;     /* 13px */
+    line-height: 1.4;
+    border-radius: var(--radius-sm);
+}
+
+
+/* ═══════════════════════════════════════════════════════════════════════
+   Viewer Header Bar
+   ═══════════════════════════════════════════════════════════════════════ */
+
+.nyp-viewer-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 12px;        /* 2× / 3× */
+    background: var(--color-bg-secondary);
+    border: 1px solid var(--color-divider);
+    border-bottom: none;
+    border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+    margin-bottom: -2px;
+    position: relative;
+    z-index: 1;
+}
+
+.nyp-viewer-label {
+    font-size: 0.6875rem;     /* 11px — caption2 */
+    color: var(--color-text-tertiary);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    line-height: 1.3;
+}
+
+.nyp-viewer-badge {
+    font-size: 0.75rem;       /* 12px — caption */
+    font-family: var(--font-mono);
+    color: var(--color-text-secondary);
+    background: var(--color-bg-tertiary);
+    padding: 4px 8px;          /* 1× / 2× */
+    border-radius: var(--radius-xs);
+    letter-spacing: 0.02em;
+    line-height: 1.2;
+}
+
+
+/* ═══════════════════════════════════════════════════════════════════════
+   Workflow Progress Bar (inline, main content)
+   ═══════════════════════════════════════════════════════════════════════ */
+
+.nyp-workflow-bar {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 8px 12px;
+    background: var(--color-blue-bg);
+    border-radius: var(--radius-sm);
+    margin: 4px 0 8px;        /* 1× / 0 / 2× */
+    animation: fade-in var(--duration-slow) var(--ease-default) both;
+}
+
+.nyp-workflow-bar.workflow-complete {
+    background: var(--color-green-bg);
+}
+
+.nyp-workflow-bar .workflow-text {
+    font-size: 0.75rem;
+    color: var(--color-text-secondary);
+    font-weight: 500;
+    line-height: 1.3;
+    white-space: nowrap;
+}
+
+.nyp-workflow-bar .workflow-text strong {
+    font-weight: 700;
+    color: var(--color-blue);
+    font-variant-numeric: tabular-nums;
+}
+
+.nyp-workflow-bar.workflow-complete .workflow-text,
+.nyp-workflow-bar.workflow-complete .workflow-text strong {
+    color: var(--color-green-text);
+}
+
+.nyp-workflow-bar .workflow-track {
+    flex: 1;
+    height: 4px;
+    background: rgba(0, 122, 255, 0.12);
+    border-radius: 2px;
+    overflow: hidden;
+    min-width: 40px;
+}
+
+.nyp-workflow-bar .workflow-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--color-blue), var(--color-ai-to));
+    border-radius: 2px;
+    transition: width 600ms var(--ease-out);
+}
+
+
+/* ═══════════════════════════════════════════════════════════════════════
+   Inline Class Labels & Assignment
+   ═══════════════════════════════════════════════════════════════════════ */
+
+.cls-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-weight: 600;
+    color: var(--color-text-primary);
+}
+
+.cls-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    display: inline-block;
+}
+
+.nyp-assignment {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 8px 12px;        /* 2× / 3× */
+    background: var(--color-bg-secondary);
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--color-divider);
+}
+
+.nyp-assignment .assign-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;                  /* 2× */
+    font-size: 0.8125rem;
+    color: var(--color-text-secondary);
+    font-weight: 500;
+    line-height: 1.3;
+}
+
+.nyp-assignment .assign-item strong {
+    color: var(--color-text-primary);
+    font-weight: 600;
+}
+
+.nyp-assignment .assign-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+
+/* ═══════════════════════════════════════════════════════════════════════
+   Save Flash
+   ═══════════════════════════════════════════════════════════════════════ */
+
+.nyp-save-flash {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;                  /* 2× */
+    padding: 8px 12px;         /* 2× / 3× */
+    background: var(--color-green-bg);
+    color: var(--color-green-text);
+    border-radius: var(--radius-sm);
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-align: center;
+    letter-spacing: 0.01em;
+    animation: fade-in-up var(--duration-normal) var(--ease-out) both;
+}
+
+
+/* ═══════════════════════════════════════════════════════════════════════
+   Toast Notifications
+   ═══════════════════════════════════════════════════════════════════════ */
+
+[data-testid="stToast"] {
+    color: #FFFFFF !important;
+}
+
+[data-testid="stToast"] * {
+    color: #FFFFFF !important;
+}
+
+
+/* ═══════════════════════════════════════════════════════════════════════
+   Accessibility — Reduced Motion
+   ═══════════════════════════════════════════════════════════════════════ */
+
+@media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+}
