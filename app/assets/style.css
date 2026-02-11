@@ -741,7 +741,7 @@ div[data-testid="stModal"]::before {
     );
     border: 1px solid rgba(0, 122, 255, 0.10);
     border-radius: var(--radius-sm);
-    margin: 8px 0;             /* 2× */
+    margin: 8px 0 16px;        /* 2× top, 4× bottom — breathing room before canvas */
     animation: fade-in-up var(--duration-slow) var(--ease-out) both;
     position: relative;
     overflow: hidden;
@@ -838,7 +838,7 @@ div[data-testid="stModal"]::before {
     background: var(--color-bg-secondary);
     border-radius: var(--radius-sm);
     border: 1px dashed var(--color-divider-strong);
-    margin: 8px 0;             /* 2× */
+    margin: 8px 0 16px;        /* 2× top, 4× bottom — breathing room before canvas */
     animation: fade-in var(--duration-slow) var(--ease-default) both;
 }
 
@@ -977,7 +977,7 @@ div[data-testid="stModal"]::before {
     color: var(--color-text-secondary);
     font-weight: 500;
     line-height: 1.4;
-    margin: 8px 0;             /* 2× */
+    margin: 8px 0 16px;        /* 2× top, 4× bottom — breathing room before canvas */
     border: 1px solid var(--color-divider);
     animation: fade-in-up var(--duration-slow) var(--ease-out) both;
 }
