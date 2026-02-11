@@ -220,6 +220,7 @@ p, span, label, .stMarkdown {
     background-color: var(--color-bg-primary);
     border-radius: var(--radius-lg);
     box-shadow: var(--shadow-sm);
+    margin-top: 40px;                     /* 10× — vertical offset from top edge */
     padding: 32px 32px 24px !important;   /* 8× / 8× / 6× — generous Apple-style inset */
     max-width: 740px;                     /* 680px canvas + 2×32px padding — keeps all chrome aligned with image */
     animation: fade-in var(--duration-slow) var(--ease-default) both;
