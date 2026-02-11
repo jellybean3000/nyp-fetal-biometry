@@ -58,8 +58,8 @@ def _ai_prompt_html(csp_conf: float) -> str:
         '</svg>'
         '</div>'
         '<div class="prompt-text">'
-        f'<strong>CSP detected{" at " + conf_label if conf_label else ""}</strong> — '
-        'draw a box around the Thalamus to complete the assessment.'
+        f'<strong>éo suggests a {conf_label} likelihood of CSP</strong> — '
+        'confirm the detection, then draw a box around the Thalamus.'
         '</div>'
         '</div>'
     )
