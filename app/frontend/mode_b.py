@@ -8,7 +8,7 @@ from backend.config import (
 from backend.image_service import list_image_paths, load_image, get_image_stem
 from backend.overlay import draw_boxes_on_image
 from backend.drawing import canvas_rect_to_yolo
-from backend.annotation_service import is_annotated, load_annotation
+from backend.annotation_service import is_annotated, load_annotation, save_cold_start
 from backend.inference_service import load_model_raw, detect_csp
 from frontend.drawable_canvas import drawable_canvas
 from frontend.components import (
