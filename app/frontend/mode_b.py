@@ -285,14 +285,17 @@ def render_mode_b():
         # Rec #2: Hint ABOVE canvas
         hint_slot = st.empty()
 
-        # Rec #3: Per-box colors from swap state
+        # Rec #3: Swap state (only affects assignment labels, not canvas)
         swapped = st.session_state.get(f"copilot_swap_{idx}", False)
         class_order = ["Thalamus", "CSP"] if swapped else ["CSP", "Thalamus"]
 
+        # Canvas colors are always fixed (CSP first, Thalamus second)
+        # so that swapping doesn't reset the drawn boxes.
+        fixed_order = ["CSP", "Thalamus"]
         box_labels = []
         stroke_colors = []
         fill_colors = []
-        for cls in class_order:
+        for cls in fixed_order:
             cid = ANNOTATION_CLASS_NAMES.index(cls)
             r, g, b = CLASS_COLORS[cid]
             box_labels.append(cls)
