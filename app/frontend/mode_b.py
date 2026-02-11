@@ -65,38 +65,6 @@ def _ai_prompt_html(csp_conf: float) -> str:
     )
 
 
-def _detection_card_html(box: dict, class_colors: tuple) -> str:
-    """Single detection card with confidence bar."""
-    r, g, b = class_colors
-    conf = box["confidence"]
-
-    if conf >= 0.7:
-        bar_color, text_color = "#34C759", "#248A3D"
-    elif conf >= 0.4:
-        bar_color, text_color = "#FF9500", "#C77800"
-    else:
-        bar_color, text_color = "#FF3B30", "#D70015"
-
-    tr2 = int(bar_color[1:3], 16)
-    tg2 = int(bar_color[3:5], 16)
-    tb2 = int(bar_color[5:7], 16)
-    bar_width = max(conf * 100, 5)
-
-    return (
-        f'<div class="nyp-detection-card">'
-        f'<div class="det-color" style="background:rgb({r},{g},{b});"></div>'
-        f'<span class="det-name">CSP</span>'
-        f'<div class="det-conf-group">'
-        f'<div class="nyp-confidence-bar">'
-        f'<div class="nyp-confidence-bar-fill" style="width:{bar_width}%;background:{bar_color};"></div>'
-        f'</div>'
-        f'<span class="det-conf" style="background:rgba({tr2},{tg2},{tb2},0.10);'
-        f'color:{text_color};">{conf:.0%}</span>'
-        f'</div>'
-        f'</div>'
-    )
-
-
 def _no_detect_html() -> str:
     """No-detection empty state with SVG icon."""
     return (
@@ -153,10 +121,6 @@ def _no_model_html(reviewed: int, threshold: int) -> str:
 def render_mode_b():
     """Render the Partial Co-Pilot interface."""
     st.header("éo-Assisted")
-    st.markdown(
-        '<p class="nyp-page-subtitle">éo assists with CSP detection — you confirm landmarks.</p>',
-        unsafe_allow_html=True,
-    )
 
     # ── Save flash ────────────────────────────────────────────────────
     render_save_flash()
@@ -234,13 +198,6 @@ def render_mode_b():
     # ═════════════════════════════════════════════════════════════════
     if csp_detected:
         best_conf = max(b["confidence"] for b in csp_boxes)
-
-        for box in csp_boxes:
-            st.markdown(
-                _detection_card_html(box, CLASS_COLORS[0]),
-                unsafe_allow_html=True,
-            )
-
         st.markdown(_ai_prompt_html(best_conf), unsafe_allow_html=True)
 
         # Rec #2: Hint ABOVE canvas
@@ -259,16 +216,8 @@ def render_mode_b():
             key=f"copilot_canvas_{idx}",
         )
 
-        # Fill hint
-        if not thalamus_rects:
-            hint_slot.markdown(
-                '<div class="nyp-step-hint">'
-                '<span class="step-num">1</span>'
-                f'Draw a box around the {_TH_TAG}'
-                '</div>',
-                unsafe_allow_html=True,
-            )
-        elif len(thalamus_rects) == 1:
+        # Fill hint (state 0 covered by AI prompt above)
+        if len(thalamus_rects) == 1:
             hint_slot.markdown(
                 '<div class="nyp-step-hint">'
                 '<span class="step-num">2</span>'
@@ -276,7 +225,7 @@ def render_mode_b():
                 '</div>',
                 unsafe_allow_html=True,
             )
-        else:
+        elif len(thalamus_rects) > 1:
             hint_slot.warning(
                 f"{len(thalamus_rects)} markers placed — need exactly 1 for the Thalamus. "
                 "Use Undo in the toolbar to remove extras."
@@ -323,13 +272,6 @@ def render_mode_b():
     # FLOW B: No CSP detected — user draws both landmarks
     # ═════════════════════════════════════════════════════════════════
     else:
-        st.markdown(
-            '<span class="nyp-ai-status status-none">'
-            '<span class="status-dot"></span>No Detection'
-            '</span>',
-            unsafe_allow_html=True,
-        )
-
         st.markdown(_no_detect_html(), unsafe_allow_html=True)
 
         preview = image
@@ -370,16 +312,8 @@ def render_mode_b():
             key=f"copilot_manual_{idx}",
         )
 
-        # Fill hint based on rect count
-        if not manual_rects:
-            hint_slot.markdown(
-                '<div class="nyp-step-hint">'
-                '<span class="step-num">1</span>'
-                f'Draw 2 boxes — {_CSP_TAG} and {_TH_TAG}'
-                '</div>',
-                unsafe_allow_html=True,
-            )
-        elif len(manual_rects) == 1:
+        # Fill hint (state 0 covered by no-detect card above)
+        if len(manual_rects) == 1:
             hint_slot.markdown(
                 '<div class="nyp-step-hint">'
                 '<span class="step-num">1</span>'

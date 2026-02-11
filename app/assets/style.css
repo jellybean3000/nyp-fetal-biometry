@@ -231,7 +231,7 @@ p, span, label, .stMarkdown {
     gap: 0 !important;
 }
 .main .block-container [data-testid="stVerticalBlock"] {
-    gap: 0.35rem !important;
+    gap: 0.5rem !important;
 }
 
 
