@@ -220,7 +220,7 @@ p, span, label, .stMarkdown {
     background-color: var(--color-bg-primary);
     border-radius: var(--radius-lg);
     box-shadow: var(--shadow-sm);
-    padding: 20px 32px 16px !important;   /* compact: 5× / 8× / 4× */
+    padding: 32px 32px 24px !important;   /* 8× / 8× / 6× — generous Apple-style inset */
     max-width: 740px;                     /* 680px canvas + 2×32px padding — keeps all chrome aligned with image */
     animation: fade-in var(--duration-slow) var(--ease-default) both;
 }
@@ -231,7 +231,12 @@ p, span, label, .stMarkdown {
     gap: 0 !important;
 }
 .main .block-container [data-testid="stVerticalBlock"] {
-    gap: 0.5rem !important;
+    gap: 0.75rem !important;              /* 12px — balanced vertical rhythm */
+}
+
+/* ── Canvas component — breathing room around the image ──────────────── */
+[data-testid="stCustomComponentV1"] {
+    margin: 4px 0 8px;                    /* slight extra separation from hint above and toolbar below */
 }
 
 
