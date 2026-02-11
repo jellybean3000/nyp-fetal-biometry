@@ -221,7 +221,7 @@ p, span, label, .stMarkdown {
     border-radius: var(--radius-lg);
     box-shadow: var(--shadow-sm);
     padding: 20px 32px 16px !important;   /* compact: 5× / 8× / 4× */
-    max-width: 1100px;
+    max-width: 740px;                     /* 680px canvas + 2×32px padding — keeps all chrome aligned with image */
     animation: fade-in var(--duration-slow) var(--ease-default) both;
 }
 
