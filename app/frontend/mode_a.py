@@ -2,9 +2,7 @@ import html
 
 import streamlit as st
 
-from backend.config import (
-    ANNOTATION_CLASS_NAMES, CLASS_COLORS, TRAINING_THRESHOLD,
-)
+from backend.config import ANNOTATION_CLASS_NAMES, CLASS_COLORS
 from backend.image_service import list_image_paths, load_image, get_image_stem
 from backend.drawing import canvas_rect_to_yolo
 from backend.annotation_service import is_annotated, load_annotation
@@ -13,7 +11,7 @@ from frontend.modal import show_threshold_dialog
 from frontend.drawable_canvas import drawable_canvas
 from frontend.components import (
     CSP_TAG as _CSP_TAG, TH_TAG as _TH_TAG,
-    render_save_flash, render_nav_bar, get_submission_count,
+    render_save_flash, render_nav_bar,
 )
 
 
@@ -23,31 +21,6 @@ def render_mode_a():
         show_threshold_dialog()
 
     st.header("Manual Review")
-
-    # ── Rec #1 + #5: Inline progress bar ─────────────────────────────
-    count = get_submission_count()
-    remaining = max(0, TRAINING_THRESHOLD - count)
-    if remaining > 0:
-        pct = min(count / TRAINING_THRESHOLD * 100, 100)
-        st.markdown(
-            f'<div class="nyp-workflow-bar">'
-            f'<span class="workflow-text">'
-            f'<strong>{count}</strong>/{TRAINING_THRESHOLD} reviewed '
-            f'— {remaining} more to unlock éo-Assisted'
-            f'</span>'
-            f'<div class="workflow-track">'
-            f'<div class="workflow-fill" style="width:{pct:.0f}%"></div>'
-            f'</div></div>',
-            unsafe_allow_html=True,
-        )
-    else:
-        st.markdown(
-            '<div class="nyp-workflow-bar workflow-complete">'
-            '<span class="workflow-text">'
-            '<strong>Threshold reached</strong> — switch to éo-Assisted mode'
-            '</span></div>',
-            unsafe_allow_html=True,
-        )
 
     # ── Save flash ────────────────────────────────────────────────────
     render_save_flash()
@@ -121,8 +94,6 @@ def render_mode_a():
         stroke_colors=stroke_colors,
         fill_colors=fill_colors,
         box_labels=box_labels,
-        header_label="Image Viewer",
-        header_badge=safe_stem,
         key=f"canvas_{idx}",
     )
 

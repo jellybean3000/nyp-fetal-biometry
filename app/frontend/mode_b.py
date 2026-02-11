@@ -256,8 +256,6 @@ def render_mode_b():
             stroke_width=2,
             fill_color=f"rgba({tr}, {tg}, {tb}, 0.08)",
             box_labels=["Thalamus"],
-            header_label="Image Viewer",
-            header_badge=safe_stem,
             key=f"copilot_canvas_{idx}",
         )
 
@@ -369,8 +367,6 @@ def render_mode_b():
             stroke_colors=stroke_colors,
             fill_colors=fill_colors,
             box_labels=box_labels,
-            header_label="Image Viewer",
-            header_badge=safe_stem,
             key=f"copilot_manual_{idx}",
         )
 

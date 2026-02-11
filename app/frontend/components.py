@@ -53,7 +53,10 @@ def render_nav_bar(idx, total, safe_stem, saved, index_key, btn_prefix=""):
             st.rerun()
     with col_info:
         st.markdown(
-            f'<div class="nyp-nav-info">Image {idx + 1} of {total}{saved_badge}</div>',
+            f'<div class="nyp-nav-info">'
+            f'<span class="nyp-viewer-badge">{safe_stem}</span> '
+            f'{idx + 1} of {total}{saved_badge}'
+            f'</div>',
             unsafe_allow_html=True,
         )
     with col_next:
