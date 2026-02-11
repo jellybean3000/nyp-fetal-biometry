@@ -285,10 +285,6 @@ def render_mode_b():
         # Rec #2: Hint ABOVE canvas
         hint_slot = st.empty()
 
-        # Rec #3: Swap state (only affects assignment labels, not canvas)
-        swapped = st.session_state.get(f"copilot_swap_{idx}", False)
-        class_order = ["Thalamus", "CSP"] if swapped else ["CSP", "Thalamus"]
-
         # Canvas colors are always fixed (CSP first, Thalamus second)
         # so that swapping doesn't reset the drawn boxes.
         fixed_order = ["CSP", "Thalamus"]
@@ -341,11 +337,17 @@ def render_mode_b():
             )
 
             # Rec #4: Assignment display + swap
-            assignments = list(class_order)
+            col_assign, col_swap = st.columns([5, 1])
+            with col_swap:
+                if st.button("Swap", key=f"copilot_swap_btn_{idx}", use_container_width=True):
+                    st.session_state[f"copilot_swap_{idx}"] = not st.session_state.get(f"copilot_swap_{idx}", False)
+
+            # Read swap state AFTER button handler so it reflects the latest toggle
+            swapped = st.session_state.get(f"copilot_swap_{idx}", False)
+            assignments = ["Thalamus", "CSP"] if swapped else ["CSP", "Thalamus"]
             r0, g0, b0 = CLASS_COLORS[ANNOTATION_CLASS_NAMES.index(assignments[0])]
             r1, g1, b1 = CLASS_COLORS[ANNOTATION_CLASS_NAMES.index(assignments[1])]
 
-            col_assign, col_swap = st.columns([5, 1])
             with col_assign:
                 st.markdown(
                     f'<div class="nyp-assignment">'
@@ -360,10 +362,6 @@ def render_mode_b():
                     f'</div>',
                     unsafe_allow_html=True,
                 )
-            with col_swap:
-                if st.button("Swap", key=f"copilot_swap_btn_{idx}", use_container_width=True):
-                    st.session_state[f"copilot_swap_{idx}"] = not swapped
-                    st.rerun()
 
             col_submit, col_skip = st.columns(2)
 
