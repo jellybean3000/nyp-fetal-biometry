@@ -97,6 +97,16 @@ def render_mode_a():
         key=f"canvas_{idx}",
     )
 
+    # ── Helper: skip (empty annotation) ──────────────────────────────
+    def _do_skip():
+        st.session_state["_pending_save"] = {
+            "stem": stem, "boxes": [], "toast": f"Skipped {safe_stem}",
+            "check_threshold": not st.session_state.get("threshold_dismissed"),
+        }
+        if idx < total - 1:
+            st.session_state["current_index"] = idx + 1
+        st.rerun()
+
     # ── Rec #2: Fill hint based on state ─────────────────────────────
     if not rects:
         if saved:
@@ -116,6 +126,8 @@ def render_mode_a():
                 '</div>',
                 unsafe_allow_html=True,
             )
+        if st.button("Skip — No CSP", key="a_skip_empty", use_container_width=True):
+            _do_skip()
         return
 
     if len(rects) == 1:
@@ -126,6 +138,8 @@ def render_mode_a():
             '</div>',
             unsafe_allow_html=True,
         )
+        if st.button("Skip — No CSP", key="a_skip_partial", use_container_width=True):
+            _do_skip()
         return
 
     if len(rects) > 2:
@@ -169,20 +183,27 @@ def render_mode_a():
             st.session_state[f"swap_{idx}"] = not swapped
             st.rerun()
 
-    # ── Confirm button ───────────────────────────────────────────────
-    if st.button("Confirm & Save", type="primary", use_container_width=True):
-        boxes = []
-        for rect, cls_name in zip(rects, assignments):
-            yolo = canvas_rect_to_yolo(rect, canvas_width, canvas_height)
-            cls_id = 0 if cls_name == "CSP" else 1
-            boxes.append({"class_id": cls_id, **yolo})
+    # ── Confirm / Skip buttons ───────────────────────────────────────
+    col_confirm, col_skip = st.columns(2)
 
-        st.session_state["_pending_save"] = {
-            "stem": stem,
-            "boxes": boxes,
-            "toast": f"Saved {safe_stem}",
-            "check_threshold": not st.session_state.get("threshold_dismissed"),
-        }
-        if idx < total - 1:
-            st.session_state["current_index"] = idx + 1
-        st.rerun()
+    with col_confirm:
+        if st.button("Confirm & Save", type="primary", use_container_width=True):
+            boxes = []
+            for rect, cls_name in zip(rects, assignments):
+                yolo = canvas_rect_to_yolo(rect, canvas_width, canvas_height)
+                cls_id = 0 if cls_name == "CSP" else 1
+                boxes.append({"class_id": cls_id, **yolo})
+
+            st.session_state["_pending_save"] = {
+                "stem": stem,
+                "boxes": boxes,
+                "toast": f"Saved {safe_stem}",
+                "check_threshold": not st.session_state.get("threshold_dismissed"),
+            }
+            if idx < total - 1:
+                st.session_state["current_index"] = idx + 1
+            st.rerun()
+
+    with col_skip:
+        if st.button("Skip", use_container_width=True, key="a_skip_complete"):
+            _do_skip()
