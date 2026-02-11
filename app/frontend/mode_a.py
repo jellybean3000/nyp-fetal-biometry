@@ -5,7 +5,7 @@ import streamlit as st
 from backend.config import ANNOTATION_CLASS_NAMES, CLASS_COLORS
 from backend.image_service import list_image_paths, load_image, get_image_stem
 from backend.drawing import canvas_rect_to_yolo
-from backend.annotation_service import is_annotated, load_annotation
+from backend.annotation_service import is_annotated, load_annotation, save_cold_start
 from backend.overlay import draw_boxes_on_image
 from frontend.modal import show_threshold_dialog
 from frontend.drawable_canvas import drawable_canvas
@@ -99,6 +99,7 @@ def render_mode_a():
 
     # ── Helper: skip (empty annotation) ──────────────────────────────
     def _do_skip():
+        save_cold_start(stem, [])
         st.session_state["_pending_save"] = {
             "stem": stem, "boxes": [], "toast": f"Skipped {safe_stem}",
             "check_threshold": not st.session_state.get("threshold_dismissed"),
